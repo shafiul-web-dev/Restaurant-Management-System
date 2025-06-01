@@ -17,7 +17,6 @@ namespace RestaurantAPI.Controllers
 			_context = context;
 		}
 
-		// 🔹 Get All Menu Items with Sorting, Filtering, and Pagination
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<MenuItemDto>>> GetMenu(
 			[FromQuery] string category,
@@ -28,13 +27,13 @@ namespace RestaurantAPI.Controllers
 		{
 			var query = _context.MenuItems.AsQueryable();
 
-			// 🔹 Filtering by Category
+			
 			if (!string.IsNullOrEmpty(category))
 			{
 				query = query.Where(m => m.Category == category);
 			}
 
-			// 🔹 Sorting Logic
+			
 			query = sortBy switch
 			{
 				"price" => sortDirection == "asc" ? query.OrderBy(m => m.Price) : query.OrderByDescending(m => m.Price),
@@ -42,7 +41,7 @@ namespace RestaurantAPI.Controllers
 				_ => query
 			};
 
-			// 🔹 Pagination
+			
 			var totalRecords = await query.CountAsync();
 			var menuItems = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize)
 				.Select(m => new MenuItemDto
@@ -58,7 +57,7 @@ namespace RestaurantAPI.Controllers
 			return Ok(new { TotalRecords = totalRecords, PageNumber = pageNumber, PageSize = pageSize, Data = menuItems });
 		}
 
-		// 🔹 Add New Menu Item with Business Logic
+		
 		[HttpPost]
 		public async Task<ActionResult<MenuItem>> AddMenuItem(MenuItem menuItem)
 		{
@@ -78,7 +77,7 @@ namespace RestaurantAPI.Controllers
 			return CreatedAtAction(nameof(GetMenu), new { id = menuItem.Id }, menuItem);
 		}
 
-		// 🔹 Update Menu Item with Business Rules
+		
 		[HttpPut("{id}")]
 		public async Task<IActionResult> UpdateMenuItem(int id, MenuItem updatedItem)
 		{
@@ -102,7 +101,7 @@ namespace RestaurantAPI.Controllers
 			return NoContent();
 		}
 
-		// 🔹 Delete Menu Item with Business Rules
+		
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteMenuItem(int id)
 		{

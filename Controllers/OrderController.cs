@@ -17,7 +17,7 @@ namespace RestaurantAPI.Controllers
 			_context = context;
 		}
 
-		// 🔹 Get All Orders with Sorting, Filtering, and Pagination
+		
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(
 			[FromQuery] string status,
@@ -28,13 +28,13 @@ namespace RestaurantAPI.Controllers
 		{
 			var query = _context.Orders.Include(o => o.OrderItems).ThenInclude(oi => oi.MenuItem).AsQueryable();
 
-			// 🔹 Filtering by Order Status
+			
 			if (!string.IsNullOrEmpty(status))
 			{
 				query = query.Where(o => o.OrderStatus == status);
 			}
 
-			// 🔹 Sorting Logic
+			
 			query = sortBy switch
 			{
 				"TableNumber" => sortDirection == "asc" ? query.OrderBy(o => o.TableNumber) : query.OrderByDescending(o => o.TableNumber),
@@ -42,7 +42,7 @@ namespace RestaurantAPI.Controllers
 				_ => query
 			};
 
-			// 🔹 Pagination
+			
 			var totalRecords = await query.CountAsync();
 			var orders = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize)
 				.Select(o => new OrderDto
@@ -76,19 +76,19 @@ namespace RestaurantAPI.Controllers
 		{
 			var query = _context.Orders.AsQueryable();
 
-			// 🔹 Filter by Order Status
+			
 			if (!string.IsNullOrEmpty(orderStatus))
 			{
 				query = query.Where(o => o.OrderStatus == orderStatus);
 			}
 
-			// 🔹 Filter by Date Range
+			
 			if (startDate.HasValue && endDate.HasValue)
 			{
 				query = query.Where(o => o.OrderTime >= startDate.Value && o.OrderTime <= endDate.Value);
 			}
 
-			// 🔹 Sorting Logic
+			
 			query = sortBy switch
 			{
 				"TotalAmount" => sortDirection == "asc" ? query.OrderBy(o => o.TotalAmount) : query.OrderByDescending(o => o.TotalAmount),
@@ -96,7 +96,7 @@ namespace RestaurantAPI.Controllers
 				_ => query
 			};
 
-			// 🔹 Pagination
+			
 			var totalRecords = await query.CountAsync();
 			var orders = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize)
 				.Select(o => new OrderHistoryDto
@@ -112,7 +112,7 @@ namespace RestaurantAPI.Controllers
 			return Ok(new { TotalRecords = totalRecords, PageNumber = pageNumber, PageSize = pageSize, Data = orders });
 		}
 
-		// 🔹 Create an Order with Business Logic
+		
 		[HttpPost]
 		public async Task<ActionResult<Order>> AddOrder(CreateOrderDto orderDto)
 		{
@@ -133,7 +133,7 @@ namespace RestaurantAPI.Controllers
 				}).ToList()
 			};
 
-			// 🔹 Calculate total price
+			
 			decimal totalAmount = 0;
 			foreach (var item in order.OrderItems)
 			{
@@ -152,7 +152,7 @@ namespace RestaurantAPI.Controllers
 			return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
 		}
 
-		// 🔹 Get a Single Order by ID
+		
 		[HttpGet("{id}")]
 		public async Task<ActionResult<OrderDto>> GetOrderById(int id)
 		{
@@ -179,7 +179,7 @@ namespace RestaurantAPI.Controllers
 			return order == null ? NotFound(new { message = "Order not found." }) : Ok(order);
 		}
 
-		// 🔹 Update Order Status
+		
 		[HttpPut("{id}")]
 		public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
 		{

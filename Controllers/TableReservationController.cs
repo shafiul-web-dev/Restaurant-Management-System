@@ -17,7 +17,7 @@ namespace RestaurantAPI.Controllers
 			_context = context;
 		}
 
-		// 🔹 Get All Reservations with Sorting, Filtering, and Pagination
+		
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<TableReservationDto>>> GetReservations(
 			[FromQuery] int? tableNumber,
@@ -28,13 +28,13 @@ namespace RestaurantAPI.Controllers
 		{
 			var query = _context.TableReservations.AsQueryable();
 
-			// 🔹 Filtering by Table Number
+			
 			if (tableNumber.HasValue)
 			{
 				query = query.Where(r => r.TableNumber == tableNumber);
 			}
 
-			// 🔹 Sorting Logic
+			
 			query = sortBy switch
 			{
 				"CustomerName" => sortDirection == "asc" ? query.OrderBy(r => r.CustomerName) : query.OrderByDescending(r => r.CustomerName),
@@ -42,7 +42,7 @@ namespace RestaurantAPI.Controllers
 				_ => query
 			};
 
-			// 🔹 Pagination
+			
 			var totalRecords = await query.CountAsync();
 			var reservations = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize)
 				.Select(r => new TableReservationDto
@@ -58,7 +58,7 @@ namespace RestaurantAPI.Controllers
 			return Ok(new { TotalRecords = totalRecords, PageNumber = pageNumber, PageSize = pageSize, Data = reservations });
 		}
 
-		// 🔹 Add a Reservation with Availability Check
+		
 		[HttpPost]
 		public async Task<ActionResult<TableReservation>> AddReservation(CreateReservationDto reservationDto)
 		{
@@ -84,7 +84,7 @@ namespace RestaurantAPI.Controllers
 			return CreatedAtAction(nameof(GetReservationById), new { id = reservation.Id }, reservation);
 		}
 
-		// 🔹 Get a Single Reservation by ID
+		
 		[HttpGet("{id}")]
 		public async Task<ActionResult<TableReservationDto>> GetReservationById(int id)
 		{
@@ -103,7 +103,7 @@ namespace RestaurantAPI.Controllers
 			return reservation == null ? NotFound(new { message = "Reservation not found." }) : Ok(reservation);
 		}
 
-		// 🔹 Update a Reservation with Business Rules
+		
 		[HttpPut("{id}")]
 		public async Task<IActionResult> UpdateReservation(int id, CreateReservationDto reservationDto)
 		{
@@ -113,13 +113,13 @@ namespace RestaurantAPI.Controllers
 				return NotFound(new { message = "Reservation not found." });
 			}
 
-			// Prevent updating past reservations
+			
 			if (reservation.ReservationDateTime < DateTime.Now)
 			{
 				return BadRequest(new { message = "Past reservations cannot be modified." });
 			}
 
-			// Prevent double bookings
+			
 			var existingReservation = await _context.TableReservations.AnyAsync(r =>
 				r.Id != id &&
 				r.TableNumber == reservationDto.TableNumber &&
@@ -139,7 +139,7 @@ namespace RestaurantAPI.Controllers
 			return Ok(new { message = "Reservation updated successfully." });
 		}
 
-		// 🔹 Cancel a Reservation
+		
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> CancelReservation(int id)
 		{
